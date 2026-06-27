@@ -1,25 +1,3 @@
-"""
-GRYPHX WhatsApp Assistant
----------------------------
-An AI-powered customer service assistant for the GRYPHX streetwear brand,
-built on WhatsApp via Twilio's webhook API and Groq's LLM inference.
-
-Architecture:
-    Customer (WhatsApp) -> Twilio -> Flask webhook -> conversation engine
-                                                      (state machine + Groq LLM)
-                                       -> Twilio -> Customer
-
-The conversational logic (menus, size guidance flow, intent classification,
-product Q&A) lives in conversation.py. This file is just the web/Twilio glue.
-
-Setup:
-    pip install -r requirements.txt
-    cp .env.example .env   # then fill in your GROQ_API_KEY
-
-Run:
-    python app.py
-"""
-
 import logging
 import os
 
@@ -30,9 +8,7 @@ from groq import Groq
 
 from conversation import handle_message
 
-# ---------------------------------------------------------------------------
-# Configuration
-# ---------------------------------------------------------------------------
+// Configuration
 
 load_dotenv()
 
@@ -60,10 +36,7 @@ def get_ai_reply(sender: str, user_message: str) -> str:
         return "Sorry, something went wrong on our end. Please try again shortly."
 
 
-# ---------------------------------------------------------------------------
-# Routes
-# ---------------------------------------------------------------------------
-
+// Routes
 
 @app.route("/whatsapp", methods=["POST"])
 def whatsapp_webhook():

@@ -1,14 +1,3 @@
-"""
-GRYPHX conversation engine.
-
-Design:
-- A small explicit state machine handles multi-step flows (size guidance)
-  where order matters and we must never re-ask an answered question.
-- An LLM call handles free-text understanding: classifying intent when the
-  customer types naturally instead of picking a menu number, and answering
-  open-ended product questions from the catalog data only (never invented).
-- State lives per-customer (by WhatsApp number) and persists to disk.
-"""
 
 import json
 import re
@@ -80,10 +69,6 @@ def persist():
     save_states(_states)
 
 
-# ---------------------------------------------------------------------------
-# Static message blocks (kept short, mobile-friendly, per spec)
-# ---------------------------------------------------------------------------
-
 GREETING = (
     "👋 Welcome to GRYPHX!\n\n"
     "I'm your virtual shopping assistant. How can I help you today?"
@@ -118,10 +103,6 @@ def format_products() -> str:
     lines.append("Would you like help choosing the right size?")
     return "\n".join(lines)
 
-
-# ---------------------------------------------------------------------------
-# LLM-backed intent classification (only used for free text, not menu taps)
-# ---------------------------------------------------------------------------
 
 INTENT_SYSTEM_PROMPT = """You classify a customer's WhatsApp message into ONE intent.
 Reply with ONLY the intent label, nothing else.
@@ -190,9 +171,6 @@ def answer_product_question(client: Groq, message: str) -> str:
         return "I don't have that information yet. Please contact our team for more details."
 
 
-# ---------------------------------------------------------------------------
-# Height parsing — accepts "5'9", "5 ft 9", "175cm", "175", etc.
-# ---------------------------------------------------------------------------
 
 def parse_height(text: str) -> Optional[float]:
     text = text.strip().lower()
@@ -229,23 +207,17 @@ def parse_weight(text: str) -> Optional[float]:
     return None
 
 
-# ---------------------------------------------------------------------------
-# Main entry point
-# ---------------------------------------------------------------------------
-
 def handle_message(client: Groq, sender: str, message: str) -> str:
     state = get_state(sender)
     message_stripped = message.strip()
     lower = message_stripped.lower()
 
-    # Universal commands, available from any stage
     if lower == "menu":
         state.stage = Stage.MAIN_MENU.value
         state.pending_product_type = None
         persist()
         return MAIN_MENU
 
-    # --- Multi-step size guidance flow takes priority while in progress ---
     if state.stage == Stage.SIZE_ASK_PRODUCT.value:
         if "linen" in lower or "pant" in lower or lower in ("2", "linen pant"):
             state.pending_product_type = "pants"
@@ -306,7 +278,6 @@ def handle_message(client: Groq, sender: str, message: str) -> str:
             return "No problem! " + MAIN_MENU
         # fall through to intent classification if they typed something else
 
-    # --- Greetings / simple menu taps handled without an LLM call ---
     if lower in ("hi", "hello", "hey", "hi!", "hello!"):
         state.stage = Stage.MAIN_MENU.value
         persist()
@@ -328,7 +299,6 @@ def handle_message(client: Groq, sender: str, message: str) -> str:
     if lower == "4":
         return CONTACT_SUPPORT
 
-    # --- Free text: classify intent via LLM ---
     intent = classify_intent(client, message_stripped)
 
     if intent == "greeting":
@@ -356,8 +326,7 @@ def handle_message(client: Groq, sender: str, message: str) -> str:
     if intent == "product_info":
         return answer_product_question(client, message_stripped)
 
-    # "other" — try answering as a product question before giving up,
-    # since most free-text messages here are genuinely product questions.
+   
     answer = answer_product_question(client, message_stripped)
     if "don't have that information" in answer.lower():
         return DIDNT_UNDERSTAND + "\n\n" + MAIN_MENU

@@ -7,7 +7,7 @@ Feels like brand support from Nike/Uniqlo/H&M: short, friendly, structured —
 not a wall of AI-generated text. Built with **Flask**, **Twilio's WhatsApp
 API**, and **Groq's LLM inference** (Llama 3.3 70B).
 
-## How it works
+# How it works
 
 ```
 Customer (WhatsApp)
@@ -34,7 +34,7 @@ Customer (WhatsApp)
      invent product details that aren't there.
 4. The reply is sent back through Twilio to the customer.
 
-## Project structure
+# Project structure
 
 | File | Responsibility |
 |---|---|
@@ -43,7 +43,7 @@ Customer (WhatsApp)
 | `catalog.py` | Product data — the single source of truth |
 | `sizing.py` | Height/weight → size recommendation logic |
 
-## Features
+# Features
 
 - **Numbered main menu** *and* natural free-text understanding — customers
   can tap "1" or type "show me your t-shirts" and land in the same flow.
@@ -59,7 +59,7 @@ Customer (WhatsApp)
 - **Universal "menu" command** to bail out of any flow at any time.
 - **Structured logging and error handling.**
 
-## Tech stack
+# Tech stack
 
 | Component | Choice | Why |
 |---|---|---|
@@ -68,7 +68,7 @@ Customer (WhatsApp)
 | LLM inference | Groq (Llama 3.3 70B) | Free tier, very low latency |
 | Tunneling (dev) | ngrok | Exposes local Flask server for Twilio webhooks |
 
-## Setup
+# Setup
 
 ```bash
 git clone <your-repo-url>
@@ -90,7 +90,7 @@ ngrok http 5000
 Paste the resulting `https://<id>.ngrok-free.app/whatsapp` URL into your
 Twilio Sandbox's **"When a message comes in"** webhook field.
 
-## Potential next steps
+# Potential next steps
 
 - Migrate from Twilio Sandbox to Meta's WhatsApp Cloud API for a permanent
   production number (no 72-hour session expiry).
@@ -100,7 +100,7 @@ Twilio Sandbox's **"When a message comes in"** webhook field.
 - Deploy to a small VPS or platform like Render/Railway to remove the
   dependency on a locally running ngrok tunnel.
 
-## Disclaimer
+# Disclaimer
 
 This is a personal/portfolio project built for GRYPHX, an independent
 streetwear brand. It is not affiliated with or endorsed by Twilio or Groq
